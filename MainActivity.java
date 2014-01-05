@@ -32,7 +32,7 @@ public class MainActivity extends Activity {
         
 		public void registra() {
 		try {
-		//Get root access
+			//Get root access
 			su = Runtime.getRuntime().exec("su");
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
@@ -108,19 +108,19 @@ public class MainActivity extends Activity {
         display = new DisplayMetrics();
         getWindowManager().getDefaultDisplay().getMetrics(display);
         
-		//I take the values ​​of height and width in pixels
+	//I take the values ​​of height and width in pixels
         larghezza = display.widthPixels;
         altezza = display.heightPixels;
         
         cartelle = new File(Environment.getExternalStorageDirectory().getPath().toString()+File.separator+"MyFolder"+File.separator+"SubFolder");
         
         if(!cartelle.exists()) {
-			//Create the folders
+	    //Create the folders
             cartelle.mkdirs();    
         }
         
         else {
-			//Nothing
+		//Nothing
         }
                         
         bottone.setOnClickListener(new View.OnClickListener() {
@@ -176,8 +176,8 @@ public class MainActivity extends Activity {
                 }
                 
                 if(bitRateBoolean && tempoBoolean && nomeFile) {
-                        //Call the method
-						registra();
+                	//Call the method
+			registra();
                     
                 }
                 
