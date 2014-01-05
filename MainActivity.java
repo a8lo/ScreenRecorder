@@ -166,7 +166,7 @@ public class MainActivity extends Activity {
                 }
                 
                 if(bitRateBoolean && tempoBoolean && nomeFile) {
-                	toast = Toast.makeText(getApplicationContext(), "La registrazione inizierà tra 10 secondi", Toast.LENGTH_SHORT);
+                	toast = Toast.makeText(getApplicationContext(), "Registration will start in 10 seconds", Toast.LENGTH_SHORT);
        	    	 	toast.show();
        	    	 
                 	new CountDownTimer(10000, 1000) {
