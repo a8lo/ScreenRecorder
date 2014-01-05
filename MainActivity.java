@@ -29,48 +29,38 @@ public class MainActivity extends Activity {
         boolean bitRateBoolean, tempoBoolean, nomeFile;
         boolean isRooted = haiRoot();
         Process su;
+        Toast toast;
         
 		public void registra() {
+		new Thread(
+				new Runnable() {
+					
+				public void run() {
 		try {
-			//Get root access
 			su = Runtime.getRuntime().exec("su");
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-        DataOutputStream outputStream = new DataOutputStream(su.getOutputStream());
-        try {
-			outputStream.writeBytes("screenrecord --size "+larghezza+"x"+altezza+" --bit-rate "+bitrate+"000000"+" --time-limit "+secondi+" /sdcard/Folder/SubFolder/"+testoFile.trim()+".mp4"+"\n");
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-        try {
-			outputStream.flush();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-
-        try {
+		
+			DataOutputStream outputStream = new DataOutputStream(su.getOutputStream());
+						
+			outputStream.writeBytes("screenrecord --size "+larghezza+"x"+altezza+" --bit-rate "+bitrate+"000000"+" --time-limit "+secondi+" /sdcard/AndroTools/Video/"+testoFile.trim()+".mp4"+"\n");
+			Notifica notifica = new Notifica();
+        	notifica.mostra(Notifica.NOTIFICA6, getBaseContext());
+        	outputStream.flush();
 			outputStream.writeBytes("exit\n");
-		} catch (IOException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
-		}
-        try {
+			Notifica.notificationBuilder.setContentText("");
 			outputStream.flush();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-        try {
 			su.waitFor();
+		} catch(IOException e) {
+			
+			e.printStackTrace();
 		} catch (InterruptedException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+				}
+				}
+				).start();
 	}
+		
         public boolean haiRoot() {
                 try {
                         //Check for root access
@@ -176,8 +166,21 @@ public class MainActivity extends Activity {
                 }
                 
                 if(bitRateBoolean && tempoBoolean && nomeFile) {
-                	//Call the method
-			registra();
+                	toast = Toast.makeText(getApplicationContext(), "La registrazione inizierà tra 10 secondi", Toast.LENGTH_SHORT);
+       	    	 	toast.show();
+       	    	 
+                	new CountDownTimer(10000, 1000) {
+
+                	     public void onTick(long millisUntilFinished) {
+                             
+                	     }
+                	     	
+                	     public void onFinish() {
+                	    	 toast.cancel();
+                	         registra();
+                	     }
+                	  }.start();   	                 	
+                }
                     
                 }
                 
