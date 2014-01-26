@@ -1,190 +1,191 @@
-package com.simonedev.screenrecorder;
+package com.simonedev.androtools;
 
+import java.io.DataOutputStream;
 import java.io.File;
 import java.io.IOException;
-import java.io.OutputStream;
-import android.app.Activity;
-import android.content.Intent;
+import java.text.Normalizer;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import android.annotation.TargetApi;
+import android.os.Build;
 import android.os.Bundle;
+import android.os.CountDownTimer;
 import android.os.Environment;
-import android.text.TextUtils;
+import android.os.Handler;
+import android.support.v4.app.NavUtils;
+import android.support.v7.app.ActionBarActivity;
 import android.util.DisplayMetrics;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.Toast;
 
-public class MainActivity extends Activity {
-        
-        String percorso, testoBitRate, testoSecondi;
-        EditText editText, editText2, editText3;
-        String testoFile;
-        File cartelle;
-        int bitrate;
-        int secondi;
-        DisplayMetrics display;
-        Button bottone;        
-        int contatore;
-        int larghezza;
-        int altezza;
-        boolean bitRateBoolean, tempoBoolean, nomeFile;
-        boolean isRooted = haiRoot();
-        Process su;
-        Toast toast;
-        
-		public void registra() {
-		new Thread(
-				new Runnable() {
-					
-				public void run() {
-		try {
-			su = Runtime.getRuntime().exec("su");
-		
-			DataOutputStream outputStream = new DataOutputStream(su.getOutputStream());
-						
-			outputStream.writeBytes("screenrecord --size "+larghezza+"x"+altezza+" --bit-rate "+bitrate+"000000"+" --time-limit "+secondi+" /sdcard/AndroTools/Video/"+testoFile.trim()+".mp4"+"\n");
-			Notifica notifica = new Notifica();
-        	notifica.mostra(Notifica.NOTIFICA6, getBaseContext());
-        	outputStream.flush();
-			outputStream.writeBytes("exit\n");
-			Notifica.notificationBuilder.setContentText("");
-			outputStream.flush();
-			su.waitFor();
+public class ScreenRecorder extends Activity {
+	
+	/*
+	 *  ==============================
+	 *  KITKAT
+	 *      SCREENRECORDER
+	 *               OPEN SOURCE
+	 *                       PROJECT
+	 *  ===============================                    
+	 */
+	
+	boolean bitRateBoolean = true, tempoBoolean = true, nomeFile = true;
+	String testoBitrate, testoSecondi, dataAttuale;
+	EditText editText, editText2, editText3;
+	SimpleDateFormat simpleDateFormat;
+	public static String testoFile;
+	public static File cartelle;
+	public static int secondi;
+	DisplayMetrics display;
+	Process su, check;
+	boolean attendi;
+	Button bottone;
+	int larghezza;
+	int altezza;
+	int bitrate;	
+	  
+	public void registra() {
+		new Thread(new Runnable() {
+			public void run() {
+				try {
+					su = Runtime.getRuntime().exec("su");
+					DataOutputStream outputStream = new DataOutputStream(su.getOutputStream());
+					outputStream.writeBytes("screenrecord --size "+larghezza+"x"+altezza+" --bit-rate "+bitrate+"000000"+" --time-limit "+secondi+" /sdcard/AndroTools/Video/"+testoFile.trim()+".mp4"+"\n");
+					outputStream.flush();
+					outputStream.writeBytes("exit\n");
+					outputStream.flush();
+					su.waitFor();
 		} catch(IOException e) {
-			
 			e.printStackTrace();
+			
 		} catch (InterruptedException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 				}
-				}
-				).start();
-	}
+				}).start();
+		}
+	
+	
+	protected void check() {
 		
-        public boolean haiRoot() {
-                try {
-                        //Check for root access
-                        su = Runtime.getRuntime().exec("su");
-                } catch (IOException e) {
-                        // TODO Auto-generated catch block
-                        e.printStackTrace();
-                }
-                return false;
-                
-        }
-        
+		if (android.os.Build.VERSION.SDK_INT < 19){
+			//You can't use this function
+		}
+	}
+	
+	protected void onResume() {
+		super.onResume();
+		check();
+	}
+	
     @Override
+	@TargetApi(Build.VERSION_CODES.HONEYCOMB)
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
+        setContentView(R.layout.activity_main);				
         
-                if (android.os.Build.VERSION.SDK_INT < 19){
-                        //You can't use this function because you've an android version less than KitKat
-                }
-
-                if(haiRoot()) {
-                        //You can't use this function becase you haven't root access
-                }
-                
-                else {
-
-                }
-
+        check();
+		
         editText = (EditText)findViewById(R.id.editText1);
         editText2 = (EditText)findViewById(R.id.editText2);
         editText3 = (EditText)findViewById(R.id.editText3);
         bottone = (Button)findViewById(R.id.button1);
-        
+                
         display = new DisplayMetrics();
         getWindowManager().getDefaultDisplay().getMetrics(display);
         
-	//I take the values ​​of height and width in pixels
         larghezza = display.widthPixels;
         altezza = display.heightPixels;
         
-        cartelle = new File(Environment.getExternalStorageDirectory().getPath().toString()+File.separator+"MyFolder"+File.separator+"SubFolder");
+        cartelle = new File(Environment.getExternalStorageDirectory().getPath().toString()+"/Recorder/VideoRec/");
         
         if(!cartelle.exists()) {
-	    //Create the folders
-            cartelle.mkdirs();    
-        }
-        
-        else {
-		//Nothing
+        	cartelle.mkdirs();
         }
                         
         bottone.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                    
-                testoBitRate = editText.getText().toString();
+            	
+                testoBitrate = editText.getText().toString();
                 testoSecondi = editText2.getText().toString();
-                testoFile = editText3.getText().toString();
+                testoFile = editText3.getText().toString().replaceAll("\\s","_");
                                 
-                if(testoBitRate.trim().length()>0) {
-                
-                bitrate = Integer.valueOf(testoBitRate);
-                
+                if(testoBitrate.trim().length()>0) {
+                bitrate = Integer.valueOf(testoBitrate);
                 }
                 
                 else {
-                        editText.setError("This filed can't be empty");
-                        
+                	bitrate = 5;
                 }
                 
                 if(testoSecondi.trim().length()>0) {
                     secondi = Integer.valueOf(testoSecondi);
+                	}
+                
+                else {
+                	secondi = 5;
+                	}
+                
+            	if(bitrate>50) {
+                	editText.setError(getString(R.string.invalidBitrate));
+                	bitRateBoolean = false;
 
                 }
-                else {
-                        
-                        editText2.setError("This field can't be empty");
-                        
-                }
-                bitRateBoolean = !TextUtils.isEmpty(editText.getText().toString());
-                tempoBoolean = !TextUtils.isEmpty(editText2.getText().toString());
-                nomeFile = !TextUtils.isEmpty(testoFile);
                 
-                    if(bitrate>30 || bitrate==0) {
-                        editText.setError("Invalide BitRate");
-                        bitRateBoolean = false;
+                if(secondi>180) {
+                	editText2.setError(getString(R.string.invalidSeconds));
+                	tempoBoolean = false;
+
                 }
-                
-                if(secondi>180 || secondi == 0) {
-                        editText2.setError("Invalide Seconds");
-                        tempoBoolean = false;
-                }
-                
                 
                 if(testoFile.trim().length()==0) {
-                        editText3.setError("This filed can't be empty");
-                        nomeFile = false;
+                	simpleDateFormat = new SimpleDateFormat("dd-MM-yyyy_HH:dd:ss");
+                	dataAttuale = simpleDateFormat.format(new Date());
+                	testoFile = "screen_recorder_"+dataAttuale;
+                	
                 }
                 
                 else {
-                        editText3.setError(null);
-                }
-                
-                if(bitRateBoolean && tempoBoolean && nomeFile) {
-                	toast = Toast.makeText(getApplicationContext(), "Registration will start in 10 seconds", Toast.LENGTH_SHORT);
-       	    	 	toast.show();
-       	    	 
-                	new CountDownTimer(10000, 1000) {
+                    testoFile = editText3.getText().toString().replaceAll("\\s","_");
+                    testoFile =  Normalizer.normalize(testoFile, Normalizer.Form.NFD).replaceAll("[^\\p{ASCII}]", "");
 
-                	     public void onTick(long millisUntilFinished) {
-                             
+                }
+                if(bitRateBoolean && tempoBoolean && testoFile!=null) {  
+        	    	 
+                	new CountDownTimer(10000, 1000) {
+              	    	 
+                	     public void onTick(long secondi) {
+                	     final Toast toast = Toast.makeText(getBaseContext(), getString(R.string.startTra)+" "+secondi/1000, Toast.LENGTH_SHORT);
+                	     toast.show();
+                	     attendi = true;
+                	        Handler handler = new Handler();
+                	            handler.postDelayed(new Runnable() {
+                	               @Override
+                	               public void run() {
+                	                   toast.cancel(); 
+                	               }
+                	        }, 1000);
                 	     }
-                	     	
+                	     
                 	     public void onFinish() {
-                	    	 toast.cancel();
+                	    	 attendi = false;
                 	         registra();
                 	     }
-                	  }.start();   	                 	
-                }
-                    
-                }
-                
+                	  }.start();        	  
+                	  
+                }  
+            	  if(attendi) {
+            		  Toast.makeText(getApplicationContext(), getString(R.string.attendi), Toast.LENGTH_SHORT).show();
+              	  }
+
             }
+            
+            
     });
 }
 }
